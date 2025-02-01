@@ -1,14 +1,9 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-import "./index.scss";
+import { MainView } from './components/main-view/main-view';
 
-const FilmApplication = () => {
-  return (
-    <div className="film">
-      <div>Good morning</div>
-    </div>
-  );
-};
+const App = () => <MainView />;
 
-const container = document.querySelector("#root");
+const container = document.querySelector('#root');
 const root = createRoot(container);
-root.render(<FilmApplication />);
+root.render(<App />);
