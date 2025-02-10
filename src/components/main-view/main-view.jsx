@@ -46,14 +46,10 @@ export const MainView = () => {
 
   if (!user) {
     return (
-      <div className="auth-container">
-        <LoginView onLoggedIn={(user, token) => {
-          setUser(user);
-          setToken(token);
-        }} />
-        <div className="divider">or</div>
-        <SignupView />
-      </div>
+      <LoginView onLoggedIn={(user, token) => {
+        setUser(user);
+        setToken(token);
+      }} />
     );
   }
 

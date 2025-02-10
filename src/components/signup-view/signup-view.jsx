@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
-export const SignupView = () => {
+export const SignupView = ({ onSignupSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -25,7 +26,7 @@ export const SignupView = () => {
     }).then((response) => {
       if (response.ok) {
         alert('Signup successful');
-        window.location.reload();
+        onSignupSuccess();
       } else {
         alert('Signup failed');
       }
@@ -33,50 +34,56 @@ export const SignupView = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="signup-form">
-      <h2>Sign Up</h2>
-      <label>
-        Username:
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-          minLength="3"
-          className="form-input"
-        />
-      </label>
-      <label>
-        Password:
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="form-input"
-        />
-      </label>
-      <label>
-        Email:
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="form-input"
-        />
-      </label>
-      <label>
-        Birthday:
-        <input
-          type="date"
-          value={birthday}
-          onChange={(e) => setBirthday(e.target.value)}
-          required
-          className="form-input"
-        />
-      </label>
-      <button type="submit" className="submit-button">Submit</button>
-    </form>
+    <div className="signup-container">
+      <form onSubmit={handleSubmit} className="signup-form">
+        <h2>Create Account</h2>
+        <label>
+          Username:
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            minLength="3"
+            className="form-input"
+          />
+        </label>
+        <label>
+          Password:
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="form-input"
+          />
+        </label>
+        <label>
+          Email:
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="form-input"
+          />
+        </label>
+        <label>
+          Birthday:
+          <input
+            type="date"
+            value={birthday}
+            onChange={(e) => setBirthday(e.target.value)}
+            required
+            className="form-input"
+          />
+        </label>
+        <button type="submit" className="submit-button">Create Account</button>
+      </form>
+    </div>
   );
+};
+
+SignupView.propTypes = {
+  onSignupSuccess: PropTypes.func.isRequired
 };
