@@ -1,64 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MovieCard } from '../movie-card/movie-card';
+import { LoginView } from '../login-view/login-view';
 import { MovieView } from '../movie-view/movie-view';
 
 export const MainView = () => {
-  // State: Holds the list of movies
-  const [movies, setMovies] = useState([
-    {
-      id: 1,
-      title: 'Inception',
-      description: 'A mind-bending thriller about dream heists.',
-      genre: 'Science Fiction',
-      director: 'Christopher Nolan',
-      poster: '/api/placeholder/300/450'  // Using placeholder with movie poster dimensions
-    },
-    {
-      id: 2,
-      title: 'The Matrix',
-      description: 'A hacker discovers a hidden reality controlled by AI.',
-      genre: 'Action/Sci-Fi',
-      director: 'Lana Wachowski, Lilly Wachowski',
-      poster: '/api/placeholder/300/450'
-    },
-    {
-      id: 3,
-      title: 'Interstellar',
-      description: 'A team of explorers ventures into a wormhole in space.',
-      genre: 'Science Fiction',
-      director: 'Christopher Nolan',
-      poster: '/api/placeholder/300/450'
-    }
-  ]);
-
-  // State: Stores the currently selected movie
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  const storedToken = localStorage.getItem('token');
+  
+  const [user, setUser] = useState(storedUser? storedUser : null);
+  const [token, setToken] = useState(storedToken? storedToken : null);
+  const [movies, setMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // If a movie is selected, display the MovieView component
-  if (selectedMovie) {
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/movies', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(data => {
+        setMovies(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching movies:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [token]);
+
+  const onLogout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.clear();
+  };
+
+  if (!user) {
     return (
-      <MovieView 
-        movie={selectedMovie} 
-        onBackClick={() => setSelectedMovie(null)}
-      />
+      <LoginView onLoggedIn={(user, token) => {
+        setUser(user);
+        setToken(token);
+      }} />
     );
   }
 
+  if (loading) return <div className="loading">Loading...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
+
   return (
-    <div className="p-4">
-      {/* Page Title */}
-      <h1 className="text-2xl font-bold mb-4">Movies</h1>
+    <div className="container">
+      <div className="header">
+        <h1 className="page-title">Movies</h1>
+        <button onClick={onLogout} className="logout-button">Logout</button>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Loop through the movies array and display a MovieCard for each movie */}
+      <div className="movie-grid">
         {movies.map((movie) => (
-          <MovieCard 
-            key={movie.id} 
-            movie={movie} 
-            onMovieClick={setSelectedMovie}
+          <MovieCard
+            key={movie._id}
+            movie={movie}
+            onMovieClick={(movie) => setSelectedMovie(movie)}
           />
         ))}
       </div>
+
+      {selectedMovie && (
+        <MovieView 
+          movie={selectedMovie}
+          onBackClick={() => setSelectedMovie(null)}
+        />
+      )}
     </div>
   );
 };
