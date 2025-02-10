@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MovieCard } from '../movie-card/movie-card';
 import { LoginView } from '../login-view/login-view';
-import { SignupView } from '../signup-view/signup-view';
+import { MovieView } from '../movie-view/movie-view';
 
 export const MainView = () => {
   const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -10,7 +10,7 @@ export const MainView = () => {
   const [user, setUser] = useState(storedUser? storedUser : null);
   const [token, setToken] = useState(storedToken? storedToken : null);
   const [movies, setMovies] = useState([]);
-  const [expandedId, setExpandedId] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -62,15 +62,23 @@ export const MainView = () => {
         <h1 className="page-title">Movies</h1>
         <button onClick={onLogout} className="logout-button">Logout</button>
       </div>
+      
       <div className="movie-grid">
         {movies.map((movie) => (
-          <MovieCard 
-            key={movie.id} 
-            movie={movie} 
-            onMovieClick={setSelectedMovie}
+          <MovieCard
+            key={movie._id}
+            movie={movie}
+            onMovieClick={(movie) => setSelectedMovie(movie)}
           />
         ))}
       </div>
+
+      {selectedMovie && (
+        <MovieView 
+          movie={selectedMovie}
+          onBackClick={() => setSelectedMovie(null)}
+        />
+      )}
     </div>
   );
 };

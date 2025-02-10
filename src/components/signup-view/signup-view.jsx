@@ -10,27 +10,39 @@ export const SignupView = ({ onSignupSuccess }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    // Match backend's expected format exactly
     const data = {
-      Username: username,
-      Password: password,
-      Email: email,
-      Birthday: birthday
+      username: username,
+      password: password,
+      email: email,
+      birthday: birthday
     };
+
+    console.log('Attempting to sign up with data:', data);
 
     fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/users', {
       method: 'POST',
-      body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json'
-      }
-    }).then((response) => {
-      if (response.ok) {
-        alert('Signup successful');
+      },
+      body: JSON.stringify(data)
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Signup failed');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Signup successful:', data);
+        alert('Signup successful! Please log in.');
         onSignupSuccess();
-      } else {
-        alert('Signup failed');
-      }
-    });
+      })
+      .catch((error) => {
+        console.error('Signup error:', error);
+        alert(error.message || 'Signup failed. Please try again.');
+      });
   };
 
   return (
@@ -45,7 +57,11 @@ export const SignupView = ({ onSignupSuccess }) => {
             onChange={(e) => setUsername(e.target.value)}
             required
             minLength="3"
+            maxLength="30"
+            pattern="^[a-zA-Z0-9_]*$"
+            title="Username can only contain letters, numbers, and underscores"
             className="form-input"
+            placeholder="Enter username"
           />
         </label>
         <label>
@@ -55,7 +71,10 @@ export const SignupView = ({ onSignupSuccess }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+            title="Password must be at least 8 characters long and include at least one letter, one number, and one special character"
             className="form-input"
+            placeholder="Enter password"
           />
         </label>
         <label>
@@ -66,6 +85,7 @@ export const SignupView = ({ onSignupSuccess }) => {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="form-input"
+            placeholder="Enter email"
           />
         </label>
         <label>

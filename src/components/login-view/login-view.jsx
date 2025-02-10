@@ -11,9 +11,11 @@ export const LoginView = ({ onLoggedIn }) => {
     event.preventDefault();
 
     const data = {
-      Username: username,
-      Password: password
+      username: username,
+      password: password
     };
+
+    console.log('Attempting to login with:', { username }); // Don't log password
 
     fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/login', {
       method: 'POST',
@@ -22,18 +24,27 @@ export const LoginView = ({ onLoggedIn }) => {
       },
       body: JSON.stringify(data)
     })
-      .then((response) => response.json())
+      .then(async (response) => {
+        const responseData = await response.json();
+        console.log('Server response:', responseData); // Log the full response
+
+        if (!response.ok) {
+          throw new Error(responseData.message || 'Login failed');
+        }
+        return responseData;
+      })
       .then((data) => {
         if (data.user) {
           localStorage.setItem('user', JSON.stringify(data.user));
           localStorage.setItem('token', data.token);
           onLoggedIn(data.user, data.token);
         } else {
-          alert('No such user');
+          throw new Error('No user data received');
         }
       })
       .catch((e) => {
-        alert('Something went wrong');
+        console.error('Login error:', e);
+        alert(e.message || 'Login failed. Please check your credentials.');
       });
   };
 
@@ -50,6 +61,7 @@ export const LoginView = ({ onLoggedIn }) => {
             required
             minLength="3"
             className="form-input"
+            placeholder="Enter username"
           />
         </label>
         <label>
@@ -60,6 +72,7 @@ export const LoginView = ({ onLoggedIn }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
             className="form-input"
+            placeholder="Enter password"
           />
         </label>
         <button type="submit" className="submit-button">Login</button>
