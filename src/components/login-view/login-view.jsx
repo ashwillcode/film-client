@@ -126,6 +126,7 @@ export const LoginView = ({ onLoggedIn }) => {
         onHide={() => setShowSignup(false)} 
         centered
         className="signup-modal"
+        keyboard={true}
       >
         <Modal.Header closeButton>
           <Modal.Title>Create Account</Modal.Title>

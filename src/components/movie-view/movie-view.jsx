@@ -11,6 +11,7 @@ export const MovieView = ({ movie, onBackClick }) => {
       centered
       size="lg"
       className="movie-modal"
+      keyboard={true}
     >
       <Modal.Body className="p-0">
         <div className="modal-body">

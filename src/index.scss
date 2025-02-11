@@ -1,8 +1,8 @@
-// Variables - Make sure these are at the top of the file
-$shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-$shadow-lg: 0 4px 8px rgba(0,0,0,0.2);
+// Variables
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
 
-// Grid Layout
+// General Layout
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -14,219 +14,113 @@ $shadow-lg: 0 4px 8px rgba(0,0,0,0.2);
   margin-bottom: 2rem;
 }
 
-.movie-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-// Auth Forms
-.auth-container {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: $shadow-sm;
-}
-
-.login-form,
-.signup-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  h2 {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .form-input {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-
-    &:focus {
-      outline: none;
-      border-color: #666;
-    }
-  }
-
-  .submit-button {
-    padding: 0.75rem;
-    background: #0066cc;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-
-    &:hover {
-      background: #0052a3;
-    }
-  }
-}
-
-.divider {
-  text-align: center;
-  margin: 1rem 0;
-  color: #666;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.logout-button {
-  padding: 0.5rem 1rem;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-
-  &:hover {
-    background: #c82333;
-  }
-}
-
-// Movie Card
+// Movie Card Styles
 .movie-card {
   background: white;
   border-radius: 8px;
   box-shadow: $shadow-sm;
-  overflow: hidden; 
-  width: 100%; 
+  overflow: hidden;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 }
-
-.movie-image-container {
-  width: 100%;
-  height: 300px; 
-  position: relative; 
-}
-
-.movie-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; 
-  display: block; 
-}
-
-.movie-title-container {
-  padding: 1rem;
-  text-align: center;
-  background: white;
-}
-
 .movie-title {
   display: none;
 }
+.movie-image-container {
 
-// Modal
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  z-index: 50;
 }
 
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  max-width: 800px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-body {
-  display: flex;
-  flex-direction: column;
-  
-  @media (min-width: 768px) {
-    flex-direction: row;
-  }
-}
-
-.modal-image {
-  width: 100%;
-  height: 300px;
+.movie-image {
+  max-width: 100%;
   object-fit: cover;
-  border-radius: 12px 12px 0 0;
-  
-  @media (min-width: 768px) {
-    width: 33.333%;
+  display: block;
+}
+
+// Modal Styles
+.movie-modal {
+  .modal-dialog {
+    @media (min-width: 768px) {
+      min-width: 800px;
+    }
+  }
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+
+    @media (min-width: 768px) {
+      flex-direction: row; // Desktop: Image on left, info on right
+      align-items: flex-start;
+    }
+  }
+
+  // Close button (top right corner)
+  .close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #666;
+
+    &:hover {
+      color: #333;
+    }
+  }
+
+  // Movie Image Styling (keep aspect ratio, adjust size for modal)
+  .modal-image {
+    width: 100%;
+    max-width: 300px;
     height: auto;
-    border-radius: 12px 0 0 12px;
+    padding-top: 30px;
+    
+    @media (min-width: 768px) {
+      max-width: 350px;
+      height: auto;
+      margin-right: 20px; // Space between image and info on desktop
+    }
   }
-}
 
-.modal-info {
-  padding: 1.5rem;
-  flex: 1;
-}
+  // Movie Info Section
+  .modal-info {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  margin-bottom: 1.5rem;
-}
-
-.modal-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  color: #666;
-  
-  &:hover {
-    color: #333;
+    @media (min-width: 768px) {
+      text-align: left;
+    }
   }
-}
 
-.movie-description {
-  color: #666;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
+  .modal-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+  }
 
-.movie-meta {
-  background: #f8f8f8;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
+  .modal-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
 
-.featured-badge {
-  display: inline-block;
-  background: #fef3c7;
-  color: #92400e;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
+  .movie-description {
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+
+  .movie-meta {
+    background: #f8f8f8;
+    padding: 10px;
+    border-radius: 8px;
+  }
 }
 
 // Loading & Error States
@@ -242,117 +136,162 @@ $shadow-lg: 0 4px 8px rgba(0,0,0,0.2);
   border-radius: 8px;
   margin: 1rem;
 }
-// Authentication styles
-.login-container {
-  max-width: 400px;
-  margin: 4rem auto;
-  padding: 2rem;
+
+login-container,
+.signup-container {
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
-.signup-prompt {
-  margin-top: 1rem;
-  text-align: center;
-  color: #666;
-
-  .signup-link {
-    background: none;
-    border: none;
-    color: #0066cc;
-    padding: 0 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-// Signup Modal specific styles
-.signup-modal {
-  &__backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  &__content {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    position: relative;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  &__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #666;
-    padding: 0.5rem;
-    line-height: 1;
-
-    &:hover {
-      color: #333;
-    }
-  }
-}
-
-// Form styles
 .login-form,
 .signup-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
 
   h2 {
     text-align: center;
-    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    
+    span {
+      color: #0d6efd;
+    }
   }
 
   label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+// Form inputs styling
+.form-input,
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  transition: border-color 0.15s ease-in-out;
+
+  &:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    outline: none;
   }
 
-  .form-input {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
+  &::placeholder {
+    color: #6c757d;
+  }
+}
 
-    &:focus {
-      outline: none;
-      border-color: #666;
+// Submit button styling
+.submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: #0b5ed7;
+  }
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
+// Signup prompt styling
+.signup-prompt {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+
+  span {
+    margin-right: 0.5rem;
+    color: #6c757d;
+  }
+}
+
+.signup-link {
+  color: #0d6efd;
+  text-decoration: none;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Modal styling to match movie modal
+.signup-modal {
+  .modal-dialog {
+    @media (min-width: 768px) {
+      max-width: 500px;
+      margin: 1.75rem auto;
     }
   }
 
-  .submit-button {
-    padding: 0.75rem;
-    background: #0066cc;
-    color: white;
+  .modal-content {
+    border-radius: 8px;
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
 
-    &:hover {
-      background: #0052a3;
+  .modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #212529;
+    }
+
+    .btn-close {
+      padding: 1rem;
+      margin: -0.5rem -0.5rem -0.5rem auto;
     }
   }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+}
+
+// Form validation feedback
+.invalid-feedback,
+.form-control-feedback {
+  display: block;
+  width: 100%;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #dc3545;
+}
+
+// Animation for modal
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+  transform: none;
 }
