@@ -1,21 +1,32 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { Form, Button, Modal } from 'react-bootstrap';
 import { SignupView } from '../signup-view/signup-view';
 
 export const LoginView = ({ onLoggedIn }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showSignup, setShowSignup] = useState(false);
+  const [validated, setValidated] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    event.stopPropagation();
+    
+    const form = event.currentTarget;
+    setValidated(true);
+
+    if (form.checkValidity() === false) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const data = {
       username: username,
       password: password
     };
-
-    console.log('Attempting to login with:', { username }); // Don't log password
 
     fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/login', {
       method: 'POST',
@@ -26,7 +37,6 @@ export const LoginView = ({ onLoggedIn }) => {
     })
       .then(async (response) => {
         const responseData = await response.json();
-        console.log('Server response:', responseData); // Log the full response
 
         if (!response.ok) {
           throw new Error(responseData.message || 'Login failed');
@@ -43,18 +53,25 @@ export const LoginView = ({ onLoggedIn }) => {
         }
       })
       .catch((e) => {
-        console.error('Login error:', e);
         alert(e.message || 'Login failed. Please check your credentials.');
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
   };
 
   return (
     <div className="login-container">
-      <form onSubmit={handleSubmit} className="login-form">
-        <h2>Welcome Back</h2>
-        <label>
-          Username:
-          <input
+      <Form 
+        noValidate 
+        validated={validated} 
+        onSubmit={handleSubmit} 
+        className="login-form"
+      >
+        <h2>Welcome To <span className="">Film!</span></h2>
+        <Form.Group className="mb-3">
+          <Form.Label>Username:</Form.Label>
+          <Form.Control
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -63,10 +80,14 @@ export const LoginView = ({ onLoggedIn }) => {
             className="form-input"
             placeholder="Enter username"
           />
-        </label>
-        <label>
-          Password:
-          <input
+          <Form.Control.Feedback type="invalid">
+            Please enter a username (minimum 3 characters).
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Password:</Form.Label>
+          <Form.Control
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -74,33 +95,46 @@ export const LoginView = ({ onLoggedIn }) => {
             className="form-input"
             placeholder="Enter password"
           />
-        </label>
-        <button type="submit" className="submit-button">Login</button>
+          <Form.Control.Feedback type="invalid">
+            Please enter your password.
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Button 
+          type="submit" 
+          className="submit-button" 
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Logging in...' : 'Login'}
+        </Button>
+
         <div className="signup-prompt">
           <span>Don't have an account?</span>
-          <button 
-            type="button" 
+          <Button 
+            variant="link"
             onClick={() => setShowSignup(true)}
             className="signup-link"
+            disabled={isSubmitting}
           >
             Sign up
-          </button>
+          </Button>
         </div>
-      </form>
+      </Form>
 
-      {showSignup && (
-        <div className="signup-modal__backdrop">
-          <div className="signup-modal__content">
-            <button 
-              className="signup-modal__close"
-              onClick={() => setShowSignup(false)}
-            >
-              ✕
-            </button>
-            <SignupView onSignupSuccess={() => setShowSignup(false)} />
-          </div>
-        </div>
-      )}
+      <Modal 
+        show={showSignup} 
+        onHide={() => setShowSignup(false)} 
+        centered
+        className="signup-modal"
+        keyboard={true}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Create Account</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <SignupView onSignupSuccess={() => setShowSignup(false)} />
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

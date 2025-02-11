@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/ashwillcode/film-client#readme",
   "dependencies": {
+    "bootstrap": "^5.3.3",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
+    "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",
     "sass": "^1.84.0",
     "sass-loader": "^16.0.4"

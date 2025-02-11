@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';  // Add this import
 
 export const SignupView = ({ onSignupSuccess }) => {
   const [username, setUsername] = useState('');
@@ -10,7 +11,6 @@ export const SignupView = ({ onSignupSuccess }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Match backend's expected format exactly
     const data = {
       username: username,
       password: password,
@@ -47,11 +47,10 @@ export const SignupView = ({ onSignupSuccess }) => {
 
   return (
     <div className="signup-container">
-      <form onSubmit={handleSubmit} className="signup-form">
-        <h2>Create Account</h2>
-        <label>
-          Username:
-          <input
+      <Form onSubmit={handleSubmit} className="signup-form">
+        <Form.Group className="mb-3">
+          <Form.Label>Username:</Form.Label>
+          <Form.Control
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -59,27 +58,33 @@ export const SignupView = ({ onSignupSuccess }) => {
             minLength="3"
             maxLength="30"
             pattern="^[a-zA-Z0-9_]*$"
-            title="Username can only contain letters, numbers, and underscores"
             className="form-input"
             placeholder="Enter username"
           />
-        </label>
-        <label>
-          Password:
-          <input
+          <Form.Control.Feedback type="invalid">
+            Username can only contain letters, numbers, and underscores
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Password:</Form.Label>
+          <Form.Control
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-            title="Password must be at least 8 characters long and include at least one letter, one number, and one special character"
             className="form-input"
             placeholder="Enter password"
           />
-        </label>
-        <label>
-          Email:
-          <input
+          <Form.Control.Feedback type="invalid">
+            Password must be at least 8 characters long and include at least one letter, one number, and one special character
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Email:</Form.Label>
+          <Form.Control
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -87,19 +92,27 @@ export const SignupView = ({ onSignupSuccess }) => {
             className="form-input"
             placeholder="Enter email"
           />
-        </label>
-        <label>
-          Birthday:
-          <input
+          <Form.Control.Feedback type="invalid">
+            Please enter a valid email address
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Birthday:</Form.Label>
+          <Form.Control
             type="date"
             value={birthday}
             onChange={(e) => setBirthday(e.target.value)}
             required
             className="form-input"
           />
-        </label>
+          <Form.Control.Feedback type="invalid">
+            Please select your birthday
+          </Form.Control.Feedback>
+        </Form.Group>
+
         <button type="submit" className="submit-button">Create Account</button>
-      </form>
+      </Form>
     </div>
   );
 };
