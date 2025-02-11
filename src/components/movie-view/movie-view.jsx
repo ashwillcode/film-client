@@ -1,16 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 export const MovieView = ({ movie, onBackClick }) => {
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onBackClick();
-    }
-  };
-
   return (
-    <div className="modal" onClick={handleBackdropClick}>
-      <div className="modal-content">
+    <Modal
+      show={true}
+      onHide={onBackClick}
+      centered
+      size="lg"
+      className="movie-modal"
+    >
+      <Modal.Body className="p-0">
         <div className="modal-body">
           <img 
             src={movie.imagepath || '/api/placeholder/400/600'} 
@@ -18,9 +20,10 @@ export const MovieView = ({ movie, onBackClick }) => {
             className="modal-image"
           />
           <div className="modal-info">
+            <button onClick={onBackClick} className="close-button">✕</button>
             <div className="modal-header">
               <h1 className="modal-title">{movie.title}</h1>
-              <button onClick={onBackClick} className="close-button">✕</button>
+
             </div>
             <p className="movie-description">{movie.description}</p>
             <div className="movie-meta">
@@ -29,8 +32,8 @@ export const MovieView = ({ movie, onBackClick }) => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </Modal.Body>
+    </Modal>
   );
 };
 

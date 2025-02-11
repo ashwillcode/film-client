@@ -48,7 +48,6 @@ export const SignupView = ({ onSignupSuccess }) => {
   return (
     <div className="signup-container">
       <form onSubmit={handleSubmit} className="signup-form">
-        <h2>Create Account</h2>
         <label>
           Username:
           <input
