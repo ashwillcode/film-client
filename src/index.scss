@@ -1,8 +1,45 @@
-// Variables
+// =================
+// IMPORTS
+// =================
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+// =================
+// VARIABLES
+// =================
 $shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
 $shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
+$primary-gradient: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+$hover-gradient: linear-gradient(45deg, #FF5555, #3DBDB4);
 
-// General Layout
+// =================
+// GLOBAL STYLES
+// =================
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+}
+
+// Custom Scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+  
+  &-track {
+    background: #f1f1f1;
+  }
+  
+  &-thumb {
+    background: $primary-gradient;
+    border-radius: 4px;
+    
+    &:hover {
+      background: $hover-gradient;
+    }
+  }
+}
+
+// =================
+// LAYOUT
+// =================
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -14,37 +51,184 @@ $shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
   margin-bottom: 2rem;
 }
 
-// Movie Card Styles
-.movie-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: $shadow-sm;
-  overflow: hidden;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-}
-.movie-title {
-  display: none;
-}
-.movie-image-container {
+// =================
+// NAVIGATION
+// =================
+.navbar {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(10px);
 
+  .navbar-toggler {
+    border: none;
+    padding: 0;
+    margin-right: 15px; 
+    
+    &:focus {
+      box-shadow: none;
+    }
+
+    .navbar-toggler-icon {
+      background-image: none;
+      position: relative;
+      width: 24px;
+      height: 24px;
+
+      &::before,
+      &::after,
+      & {
+        content: '';
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        display: block;
+        width: 30px;
+        height: 4px;
+        border-radius: 1px;
+        position: absolute;
+        transition: transform 0.3s ease;
+      }
+
+      &::before {
+        top: 8px;
+      }
+
+      &::after {
+        bottom: 8px;
+      }
+    }
+  }
+
+  .navbar-toggler[aria-expanded="true"] {
+    .navbar-toggler-icon {
+      background: transparent;
+
+      &::before {
+        transform: translateY(3px) rotate(45deg);
+      }
+
+      &::after {
+        transform: translateY(-3px) rotate(-45deg);
+      }
+    }
+  }
+
+  .navbar-collapse {
+    .navbar-nav {
+      @media (max-width: 991px) {
+        padding: 1rem 15px; 
+        
+        .nav-link {
+          padding: 0.8rem 0;
+          border-bottom: 1px solid rgba(0,0,0,0.1);
+
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+    }
+  }
+
+  .nav-link {
+    font-weight: 500;
+    transition: color 0.2s ease;
+    position: relative;
+
+    &:hover {
+      color: #4ECDC4 !important;
+    }
+
+    @media (min-width: 992px) {
+      &::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 10%;
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        transition: all 0.3s ease;
+      }
+
+      &:hover::after {
+        width: 80%;
+      }
+    }
+  }
+
+  .ms-auto {
+    @media (max-width: 991px) {
+      margin-left: 0 !important;
+    }
+  }
+
+  .container {
+    @media (max-width: 991px) {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+}
+// =================
+// MOVIE CARDS
+// =================
+
+.movie-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+  transform: translateY(-5px);
 }
 
 .movie-image {
-  max-width: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  display: block;
 }
 
-// Modal Styles
+.movie-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(45deg, rgba(255, 107, 107, 0.95), rgba(78, 205, 196, 0.95));
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover .movie-info {
+  transform: translateY(0);
+}
+
+.movie-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.director-name {
+  font-size: 0.9rem;
+  color: #222;
+  margin: 0;
+}
+
+// =================
+// MOVIE MODAL
+// =================
 .movie-modal {
   .modal-dialog {
     @media (min-width: 768px) {
       min-width: 800px;
     }
   }
+  
   .modal-body {
     display: flex;
     flex-direction: column;
@@ -52,12 +236,11 @@ $shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
 
     @media (min-width: 768px) {
-      flex-direction: row; // Desktop: Image on left, info on right
+      flex-direction: row;
       align-items: flex-start;
     }
   }
 
-  // Close button (top right corner)
   .close-button {
     position: absolute;
     top: 15px;
@@ -73,7 +256,6 @@ $shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
   }
 
-  // Movie Image Styling (keep aspect ratio, adjust size for modal)
   .modal-image {
     width: 100%;
     max-width: 300px;
@@ -83,11 +265,10 @@ $shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
     @media (min-width: 768px) {
       max-width: 350px;
       height: auto;
-      margin-right: 20px; // Space between image and info on desktop
+      margin-right: 20px;
     }
   }
 
-  // Movie Info Section
   .modal-info {
     flex: 1;
     padding: 20px;
@@ -96,48 +277,48 @@ $shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
     @media (min-width: 768px) {
       text-align: left;
     }
-  }
 
-  .modal-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 15px;
-  }
+    .modal-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      display: inline-block;
+      
+    }
 
-  .modal-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-  }
+    .movie-description {
+      color: #666;
+      margin: 25px 0px 25px 0px;
+      line-height: 1.5;
+    }
 
-  .movie-description {
-    color: #666;
-    margin-bottom: 15px;
-    line-height: 1.5;
-  }
-
-  .movie-meta {
-    background: #f8f8f8;
-    padding: 10px;
-    border-radius: 8px;
+    .movie-meta {
+      background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+      padding: 15px;
+      border-radius: 8px;
+      
+      p {
+        margin-bottom: 8px;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        strong {
+          font-weight: 600;
+        }
+      }
+    }
   }
 }
 
-// Loading & Error States
-.loading {
-  text-align: center;
-  padding: 2rem;
-}
-
-.error {
-  background: #fee2e2;
-  color: #b91c1c;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem;
-}
-
-login-container,
+// =================
+// LOGIN/SIGNUP STYLES
+// =================
+.login-container,
 .signup-container {
   padding: 20px;
   width: 100%;
@@ -149,17 +330,15 @@ login-container,
 .signup-form {
   background: white;
   padding: 2rem;
-  border-radius: 8px;
 
   h2 {
     text-align: center;
     font-size: 1.8rem;
     font-weight: bold;
     margin-bottom: 1.5rem;
-    
-    span {
-      color: #0d6efd;
-    }
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   label {
@@ -170,7 +349,226 @@ login-container,
   }
 }
 
-// Form inputs styling
+// Form inputs
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: #4ECDC4;
+    box-shadow: 0 0 0 0.25rem rgba(78, 205, 196, 0.25);
+    outline: none;
+  }
+
+  &::placeholder {
+    color: #6c757d;
+  }
+}
+
+// Submit button
+.submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  color: white;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  transition: all 0.3s ease;
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(45deg, #FF5555, #3DBDB4);
+  }
+
+  &:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
+// Signup prompt
+.signup-prompt {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+
+  span {
+    color: #6c757d;
+  }
+}
+
+.signup-link {
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.5rem;
+
+  &:hover, &:focus {
+    text-decoration: underline;
+    border: none;
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+// Modal styling
+.signup-modal {
+  .modal-content {
+    border: none;
+    background: white;
+  }
+
+  .modal-header {
+    border-bottom: none;
+    padding: 1.5rem 1.5rem 0.5rem;
+
+    .modal-title {
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: bold;
+    }
+
+    .btn-close {
+      padding: 1rem;
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+}
+// =================
+// PROFILE STYLES
+// =================
+// =================
+// PROFILE STYLES
+// =================
+.profile-card {
+  padding: 2rem;
+  background: white;
+  
+  .profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      border-radius: 50%;
+
+      .avatar-text {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 600;
+      }
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .profile-email {
+      color: #666;
+      margin-bottom: 0;
+    }
+  }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    .stat-item {
+      padding: 1rem;
+      text-align: center;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+      }
+    }
+  }
+
+  .profile-details {
+    border-top: 1px solid #dee2e6;
+    padding-top: 2rem;
+
+    h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .detail-item {
+      margin-bottom: 1.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .detail-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .detail-value {
+        font-size: 1rem;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// =================
+// FORM STYLES
+// =================
+.login-container,
+.signup-container {
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
 .form-input,
 .form-control {
   width: 100%;
@@ -191,107 +589,18 @@ login-container,
   }
 }
 
-// Submit button styling
-.submit-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #0d6efd;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.15s ease-in-out;
-
-  &:hover {
-    background-color: #0b5ed7;
-  }
-
-  &:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-  }
-}
-
-// Signup prompt styling
-.signup-prompt {
+// =================
+// UTILITY CLASSES
+// =================
+.loading {
   text-align: center;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #dee2e6;
-
-  span {
-    margin-right: 0.5rem;
-    color: #6c757d;
-  }
+  padding: 2rem;
 }
 
-.signup-link {
-  color: #0d6efd;
-  text-decoration: none;
-  padding: 0;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-// Modal styling to match movie modal
-.signup-modal {
-  .modal-dialog {
-    @media (min-width: 768px) {
-      max-width: 500px;
-      margin: 1.75rem auto;
-    }
-  }
-
-  .modal-content {
-    border-radius: 8px;
-    border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .modal-header {
-    border-bottom: 1px solid #dee2e6;
-    padding: 1rem 1.5rem;
-    background-color: #f8f9fa;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-
-    .modal-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #212529;
-    }
-
-    .btn-close {
-      padding: 1rem;
-      margin: -0.5rem -0.5rem -0.5rem auto;
-    }
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-  }
-}
-
-// Form validation feedback
-.invalid-feedback,
-.form-control-feedback {
-  display: block;
-  width: 100%;
-  margin-top: -0.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-  color: #dc3545;
-}
-
-// Animation for modal
-.modal.fade .modal-dialog {
-  transition: transform 0.3s ease-out;
-  transform: translate(0, -50px);
-}
-
-.modal.show .modal-dialog {
-  transform: none;
+.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem;
 }
