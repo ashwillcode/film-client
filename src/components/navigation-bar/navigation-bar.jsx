@@ -38,30 +38,20 @@ export const NavigationBar = ({ user, onLogout }) => {
             WebkitTextFillColor: 'transparent'
           }}
         >
-          MovieVerse
+          Film
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
             {!user ? (
-              <>
-                <Nav.Link 
-                  as={Link} 
-                  to="/login"
-                  className="nav-link px-4 text-dark"
-                  onClick={handleClose}
-                >
-                  Login
-                </Nav.Link>
-                <Nav.Link 
-                  as={Link} 
-                  to="/signup"
-                  className="nav-link px-4 text-dark"
-                  onClick={handleClose}
-                >
-                  Signup
-                </Nav.Link>
-              </>
+              <Nav.Link 
+                as={Link} 
+                to="/login"
+                className="nav-link px-4 text-dark"
+                onClick={handleClose}
+              >
+                Login or Signup
+              </Nav.Link>
             ) : (
               <>
                 <Nav.Link 
