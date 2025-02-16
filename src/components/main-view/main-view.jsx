@@ -10,9 +10,9 @@ import { ProfileView } from '../profile-view/profile-view';
 export const MainView = () => {
   const storedUser = JSON.parse(localStorage.getItem('user'));
   const storedToken = localStorage.getItem('token');
-  
-  const [user, setUser] = useState(storedUser ? storedUser : null);
-  const [token, setToken] = useState(storedToken ? storedToken : null);
+
+  const [user, setUser] = useState(storedUser || null);
+  const [token, setToken] = useState(storedToken || null);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +27,7 @@ export const MainView = () => {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error('Failed to fetch movies');
         return response.json();
       })
       .then(data => {
@@ -47,7 +47,64 @@ export const MainView = () => {
     localStorage.clear();
   };
 
-  // Show loading spinner while fetching data
+  const toggleFavorite = async (movieId) => {
+    if (!user || !movieId) {
+      return;
+    }
+  
+    const isFavorite = user.favoritemovies?.includes(movieId);
+    
+    try {
+      let response;
+      
+      if (isFavorite) {
+        response = await fetch(
+          `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites/${movieId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Accept': 'application/json',
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+      } else {
+        response = await fetch(
+          `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ movieId })
+          }
+        );
+      }
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || (isFavorite ? 'Failed to remove from favorites' : 'Failed to add to favorites'));
+      }
+  
+      const data = await response.json();
+      
+      const updatedUser = {
+        ...user,
+        favoritemovies: data.favoritemovies || user.favoritemovies
+      };
+  
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+  
+    } catch (error) {
+      console.error('Error updating favorites:', error);
+      setError(error.message);
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
   if (loading) {
     return (
       <Container>
@@ -63,91 +120,86 @@ export const MainView = () => {
     );
   }
 
-  // Show error message if there's an error
-  if (error) {
-    return (
-      <Container>
-        <NavigationBar user={user} onLogout={onLogout} />
-        <Row className="justify-content-center mt-5">
-          <Col md={8}>
-            <Alert variant="danger">
-              Error: {error}
-            </Alert>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
   return (
     <Container>
       <NavigationBar user={user} onLogout={onLogout} />
       
+      {error && (
+        <Alert 
+          variant="danger" 
+          className="mt-3" 
+          onClose={() => setError(null)} 
+          dismissible
+        >
+          {error}
+        </Alert>
+      )}
+      
       <Row>
         <Routes>
-          {/* Login Route */}
-          <Route
-            path="/login"
+          <Route 
+            path="/login" 
             element={
-              user ? (
-                <Navigate to="/" />
-              ) : (
+              user ? <Navigate to="/" /> : (
                 <Col md={6} className="mx-auto">
-                  <LoginView 
-                    onLoggedIn={(user, token) => {
-                      setUser(user);
-                      setToken(token);
-                    }} 
-                  />
+                  <LoginView onLoggedIn={(user, token) => { 
+                    setUser(user); 
+                    setToken(token); 
+                    localStorage.setItem('user', JSON.stringify(user));
+                    localStorage.setItem('token', token);
+                  }} />
                 </Col>
               )
-            }
+            } 
           />
 
-          {/* Profile Route */}
-          <Route
-            path="/profile"
+          <Route 
+            path="/profile" 
             element={
-              !user ? (
-                <Navigate to="/login" />
-              ) : (
-                <ProfileView user={user} />
+              !user ? <Navigate to="/login" /> : (
+                <ProfileView 
+                  user={user} 
+                  token={token} 
+                  movies={movies} 
+                  onUserUpdate={setUser} 
+                  onLoggedOut={onLogout} 
+                />
               )
-            }
+            } 
           />
 
-          {/* Movie Details Route */}
-          <Route
-            path="/movies/:movieId"
+          <Route 
+            path="/movies/:movieId" 
             element={
-              !user ? (
-                <Navigate to="/login" />
-              ) : (
+              !user ? <Navigate to="/login" /> : (
                 <Col>
                   <MovieView 
                     movies={movies}
+                    user={user}
+                    onToggleFavorite={toggleFavorite}
                   />
                 </Col>
               )
-            }
+            } 
           />
 
-          {/* Main Movies Grid Route */}
-          <Route
-            path="/"
+          <Route 
+            path="/" 
             element={
-              !user ? (
-                <Navigate to="/login" />
-              ) : (
+              !user ? <Navigate to="/login" /> : (
                 <Row className="g-4">
                   {movies.map((movie) => (
                     <Col key={movie._id} xs={12} sm={6} md={4} lg={3} className="mb-4">
-                      <MovieCard movie={movie} />
+                      <MovieCard 
+                        movie={movie} 
+                        isFavorite={Boolean(user.favoritemovies?.includes(movie._id))} 
+                        onToggleFavorite={toggleFavorite} 
+                      />
                     </Col>
                   ))}
                 </Row>
               )
-            }
+            } 
           />
         </Routes>
       </Row>
