@@ -47,11 +47,8 @@ export const MainView = () => {
     localStorage.clear();
   };
 
-  // MainView.jsx - Updated toggleFavorite function
-
   const toggleFavorite = async (movieId) => {
     if (!user || !movieId) {
-      console.log('Missing user or movieId:', { user, movieId });
       return;
     }
   
@@ -61,7 +58,6 @@ export const MainView = () => {
       let response;
       
       if (isFavorite) {
-        // Remove from favorites
         response = await fetch(
           `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites/${movieId}`,
           {
@@ -73,7 +69,6 @@ export const MainView = () => {
           }
         );
       } else {
-        // Add to favorites
         response = await fetch(
           `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites`,
           {
@@ -95,7 +90,6 @@ export const MainView = () => {
   
       const data = await response.json();
       
-      // Create updated user object maintaining all existing user data
       const updatedUser = {
         ...user,
         favoritemovies: data.favoritemovies || user.favoritemovies
@@ -212,3 +206,5 @@ export const MainView = () => {
     </Container>
   );
 };
+
+export default MainView;

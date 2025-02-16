@@ -15,17 +15,8 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
   const handleFavoriteClick = async (e) => {
     e.stopPropagation();
     try {
-      console.log('MovieView: Attempting to toggle favorite:', {
-        movieId: movie._id,
-        currentlyFavorite: isFavorite,
-        userFavorites: user?.FavoriteMovies
-      });
-      
       await onToggleFavorite(movie._id);
-      
-      console.log('MovieView: Successfully toggled favorite');
     } catch (error) {
-      console.error('MovieView: Error in handleFavoriteClick:', error);
       setError(error.message || 'An error occurred while updating favorites');
       setTimeout(() => setError(null), 3000);
     }
