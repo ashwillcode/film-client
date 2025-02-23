@@ -2,6 +2,20 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form } from 'react-bootstrap';  // Add this import
 
+// Add these validation functions at the top of your component
+const validatePassword = {
+  length: (password) => password.length >= 8,
+  letter: (password) => /[A-Za-z]/.test(password),
+  number: (password) => /\d/.test(password),
+  special: (password) => /[@$!%*#?&]/.test(password)
+};
+
+// Add username validation functions
+const validateUsername = {
+  length: (username) => username.length >= 3 && username.length <= 30,
+  characters: (username) => /^[a-zA-Z0-9_]*$/.test(username)
+};
+
 export const SignupView = ({ onSignupSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -54,6 +68,19 @@ export const SignupView = ({ onSignupSuccess }) => {
     <div className="signup-container">
       <Form onSubmit={handleSubmit} className="signup-form">
         <Form.Group className="mb-3">
+          <Form.Text className="text-muted d-block mb-2">
+            Username must:
+            <ul className="mb-2 ps-3 validation-requirements">
+              <li className={validateUsername.length(username) ? 'text-success' : 'text-muted'}>
+                <i className={`bi ${validateUsername.length(username) ? 'bi-check-circle-fill' : 'bi-circle'} me-2`}></i>
+                Be between 3 and 30 characters
+              </li>
+              <li className={validateUsername.characters(username) ? 'text-success' : 'text-muted'}>
+                <i className={`bi ${validateUsername.characters(username) ? 'bi-check-circle-fill' : 'bi-circle'} me-2`}></i>
+                Only contain letters, numbers, and underscores
+              </li>
+            </ul>
+          </Form.Text>
           <Form.Label>Username: <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="text"
@@ -67,18 +94,30 @@ export const SignupView = ({ onSignupSuccess }) => {
             placeholder="Enter username"
           />
           <Form.Control.Feedback type="invalid">
-            Username must be between 3 and 30 characters
+            Please ensure your username meets all requirements
           </Form.Control.Feedback>
         </Form.Group>
 
         <Form.Group className="mb-3">
           <Form.Text className="text-muted d-block mb-2">
             Password must:
-            <ul className="mb-2 ps-3">
-              <li>Be at least 8 characters long</li>
-              <li>Include at least one letter</li>
-              <li>Include at least one number</li>
-              <li>Include at least one special character (@$!%*#?&)</li>
+            <ul className="mb-2 ps-3 password-requirements">
+              <li className={validatePassword.length(password) ? 'text-success' : 'text-muted'}>
+                <i className={`bi ${validatePassword.length(password) ? 'bi-check-circle-fill' : 'bi-circle'} me-2`}></i>
+                Be at least 8 characters long
+              </li>
+              <li className={validatePassword.letter(password) ? 'text-success' : 'text-muted'}>
+                <i className={`bi ${validatePassword.letter(password) ? 'bi-check-circle-fill' : 'bi-circle'} me-2`}></i>
+                Include at least one letter
+              </li>
+              <li className={validatePassword.number(password) ? 'text-success' : 'text-muted'}>
+                <i className={`bi ${validatePassword.number(password) ? 'bi-check-circle-fill' : 'bi-circle'} me-2`}></i>
+                Include at least one number
+              </li>
+              <li className={validatePassword.special(password) ? 'text-success' : 'text-muted'}>
+                <i className={`bi ${validatePassword.special(password) ? 'bi-check-circle-fill' : 'bi-circle'} me-2`}></i>
+                Include at least one special character (@$!%*#?&)
+              </li>
             </ul>
           </Form.Text>
           <Form.Label>Password: <span className="text-danger">*</span></Form.Label>
@@ -150,6 +189,29 @@ export const SignupView = ({ onSignupSuccess }) => {
         </button>
         {error && <div className="error-message">{error}</div>}
       </Form>
+
+      <style jsx>{`
+        .password-requirements li {
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+        }
+
+        .text-success {
+          color: #198754 !important;
+        }
+
+        .bi {
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .validation-requirements li {
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+        }
+      `}</style>
     </div>
   );
 };
