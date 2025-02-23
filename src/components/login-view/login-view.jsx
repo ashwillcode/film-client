@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Button, Modal } from 'react-bootstrap';
 import { SignupView } from '../signup-view/signup-view';
+import { useDispatch } from "react-redux";
+import { setUser, setToken } from "../../redux/reducers/user";
 
 export const LoginView = ({ onLoggedIn }) => {
   const [username, setUsername] = useState('');
@@ -9,8 +11,9 @@ export const LoginView = ({ onLoggedIn }) => {
   const [showSignup, setShowSignup] = useState(false);
   const [validated, setValidated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const dispatch = useDispatch();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     event.stopPropagation();
     
@@ -23,41 +26,29 @@ export const LoginView = ({ onLoggedIn }) => {
 
     setIsSubmitting(true);
 
-    const data = {
-      username: username,
-      password: password
-    };
-
-    fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-      .then(async (response) => {
-        const responseData = await response.json();
-
-        if (!response.ok) {
-          throw new Error(responseData.message || 'Login failed');
-        }
-        return responseData;
-      })
-      .then((data) => {
-        if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-          localStorage.setItem('token', data.token);
-          onLoggedIn(data.user, data.token);
-        } else {
-          throw new Error('No user data received');
-        }
-      })
-      .catch((e) => {
-        alert(e.message || 'Login failed. Please check your credentials.');
-      })
-      .finally(() => {
-        setIsSubmitting(false);
+    try {
+      const response = await fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
       });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        dispatch(setUser(data.user));
+        dispatch(setToken(data.token));
+      } else {
+        throw new Error(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert(error.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

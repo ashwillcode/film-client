@@ -3,19 +3,29 @@ import { Card, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { FaHeart } from 'react-icons/fa';
 import PropTypes from 'prop-types';
+import { useDispatch } from "react-redux";
+import { setSelectedMovie } from "../../redux/reducers/movies";
 
 export const MovieCard = ({ movie, isFavorite, onToggleFavorite }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFavoriteClick = async (e) => {
     e.stopPropagation();
     e.preventDefault();
+    
+    if (isSubmitting) return;
+    
     try {
-      await onToggleFavorite(movie._id);
+      setIsSubmitting(true);
+      await onToggleFavorite(movie._id, isFavorite);
     } catch (error) {
       setError(error.message);
       setTimeout(() => setError(null), 3000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -34,7 +44,10 @@ export const MovieCard = ({ movie, isFavorite, onToggleFavorite }) => {
       )}
       <div 
         className="movie-card"
-        onClick={() => navigate(`/movies/${movie._id}`)}
+        onClick={() => {
+          dispatch(setSelectedMovie(movie));
+          navigate(`/movies/${movie._id}`);
+        }}
       >
         <FaHeart
           className={`favorite-icon ${isFavorite ? 'favorited' : ''}`}

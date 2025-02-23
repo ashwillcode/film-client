@@ -1,28 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { MovieCard } from '../movie-card/movie-card';
-import { LoginView } from '../login-view/login-view';
+import { useDispatch, useSelector } from 'react-redux';
 import { MovieView } from '../movie-view/movie-view';
+import { LoginView } from '../login-view/login-view';
 import { NavigationBar } from '../navigation-bar/navigation-bar';
 import { ProfileView } from '../profile-view/profile-view';
+import { MoviesList } from '../movies-list/movies-list';
+import { setMovies, setLoading, setError } from '../../redux/reducers/movies';
+import { setUser, setToken, clearUser } from '../../redux/reducers/user';
 
 export const MainView = () => {
-  const storedUser = JSON.parse(localStorage.getItem('user'));
-  const storedToken = localStorage.getItem('token');
-
-  const [user, setUser] = useState(storedUser || null);
-  const [token, setToken] = useState(storedToken || null);
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  const token = useSelector((state) => state.user.token);
+  const loading = useSelector((state) => state.movies.loading);
+  const error = useSelector((state) => state.movies.error);
+  const movies = useSelector((state) => state.movies.list);
 
   useEffect(() => {
     if (!token) {
-      setLoading(false);
+      dispatch(setLoading(false));
       return;
     }
 
+    dispatch(setLoading(true));
     fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/movies', {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -31,84 +33,62 @@ export const MainView = () => {
         return response.json();
       })
       .then(data => {
-        setMovies(data);
-        setLoading(false);
+        dispatch(setMovies(data));
+        dispatch(setLoading(false));
       })
       .catch(err => {
         console.error('Error fetching movies:', err);
-        setError(err.message);
-        setLoading(false);
+        dispatch(setError(err.message));
+        dispatch(setLoading(false));
       });
-  }, [token]);
+  }, [token, dispatch]);
 
   const onLogout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.clear();
+    dispatch(clearUser());
   };
 
-  const toggleFavorite = async (movieId) => {
-    if (!user || !movieId) {
-      return;
-    }
-  
-    const isFavorite = user.favoritemovies?.includes(movieId);
-    
+  const toggleFavorite = async (movieId, isCurrentlyFavorite) => {
+    if (!user || !movieId || !token) return;
+
     try {
-      let response;
-      
-      if (isFavorite) {
-        response = await fetch(
-          `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites/${movieId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              'Accept': 'application/json',
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
-      } else {
-        response = await fetch(
-          `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ movieId })
-          }
-        );
-      }
-  
+      const url = isCurrentlyFavorite
+        ? `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites/${movieId}`
+        : `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}/favorites`;
+
+      const response = await fetch(url, {
+        method: isCurrentlyFavorite ? 'DELETE' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        ...((!isCurrentlyFavorite) && { body: JSON.stringify({ movieId }) })
+      });
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || (isFavorite ? 'Failed to remove from favorites' : 'Failed to add to favorites'));
+        throw new Error(errorData.message || `Failed to ${isCurrentlyFavorite ? 'remove from' : 'add to'} favorites`);
       }
-  
+
       const data = await response.json();
       
-      const updatedUser = {
+      // Update Redux store with new user data
+      dispatch(setUser({
         ...user,
-        favoritemovies: data.favoritemovies || user.favoritemovies
-      };
-  
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-  
+        favoritemovies: data.favoritemovies || [],
+        token
+      }));
+
     } catch (error) {
       console.error('Error updating favorites:', error);
-      setError(error.message);
-      setTimeout(() => setError(null), 3000);
+      throw error;
     }
   };
 
   if (loading) {
     return (
       <Container>
-        <NavigationBar user={user} onLogout={onLogout} />
+        <NavigationBar />
         <Row className="justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
           <Col className="text-center">
             <Spinner animation="border" role="status">
@@ -122,13 +102,13 @@ export const MainView = () => {
 
   return (
     <Container>
-      <NavigationBar user={user} onLogout={onLogout} />
+      <NavigationBar />
       
       {error && (
         <Alert 
           variant="danger" 
           className="mt-3" 
-          onClose={() => setError(null)} 
+          onClose={() => dispatch(setError(null))} 
           dismissible
         >
           {error}
@@ -142,12 +122,7 @@ export const MainView = () => {
             element={
               user ? <Navigate to="/" /> : (
                 <Col md={6} className="mx-auto">
-                  <LoginView onLoggedIn={(user, token) => { 
-                    setUser(user); 
-                    setToken(token); 
-                    localStorage.setItem('user', JSON.stringify(user));
-                    localStorage.setItem('token', token);
-                  }} />
+                  <LoginView />
                 </Col>
               )
             } 
@@ -158,11 +133,8 @@ export const MainView = () => {
             element={
               !user ? <Navigate to="/login" /> : (
                 <ProfileView 
-                  user={user} 
-                  token={token} 
-                  movies={movies} 
-                  onUserUpdate={setUser} 
-                  onLoggedOut={onLogout} 
+                  movies={movies}
+                  onLoggedOut={onLogout}
                 />
               )
             } 
@@ -173,11 +145,7 @@ export const MainView = () => {
             element={
               !user ? <Navigate to="/login" /> : (
                 <Col>
-                  <MovieView 
-                    movies={movies}
-                    user={user}
-                    onToggleFavorite={toggleFavorite}
-                  />
+                  <MovieView onToggleFavorite={toggleFavorite} />
                 </Col>
               )
             } 
@@ -187,17 +155,10 @@ export const MainView = () => {
             path="/" 
             element={
               !user ? <Navigate to="/login" /> : (
-                <Row className="g-4">
-                  {movies.map((movie) => (
-                    <Col key={movie._id} xs={12} sm={6} md={4} lg={3} className="mb-4">
-                      <MovieCard 
-                        movie={movie} 
-                        isFavorite={Boolean(user.favoritemovies?.includes(movie._id))} 
-                        onToggleFavorite={toggleFavorite} 
-                      />
-                    </Col>
-                  ))}
-                </Row>
+                <MoviesList 
+                  movies={movies}
+                  onToggleFavorite={toggleFavorite}
+                />
               )
             } 
           />

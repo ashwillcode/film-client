@@ -7,42 +7,45 @@ export const SignupView = ({ onSignupSuccess }) => {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [birthday, setBirthday] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const formattedBirthday = birthday ? new Date(birthday).toISOString() : null;
+      
+      const signupData = {
+        username: username,
+        password: password,
+        email: email,
+        birthday: formattedBirthday
+      };
 
-    const data = {
-      username: username,
-      password: password,
-      email: email,
-      birthday: birthday
-    };
-
-    console.log('Attempting to sign up with data:', data);
-
-    fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Signup failed');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log('Signup successful:', data);
-        alert('Signup successful! Please log in.');
-        onSignupSuccess();
-      })
-      .catch((error) => {
-        console.error('Signup error:', error);
-        alert(error.message || 'Signup failed. Please try again.');
+      const response = await fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(signupData)
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Signup failed');
+      }
+
+      alert('Signup successful! Please login.');
+      onSignupSuccess();
+
+    } catch (error) {
+      setError(error.message || 'Failed to sign up. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,7 +114,8 @@ export const SignupView = ({ onSignupSuccess }) => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <button type="submit" className="submit-button">Create Account</button>
+        <button type="submit" className="submit-button" disabled={isSubmitting}>Create Account</button>
+        {error && <div className="error-message">{error}</div>}
       </Form>
     </div>
   );
