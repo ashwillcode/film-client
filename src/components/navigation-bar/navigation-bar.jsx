@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useSelector, useDispatch } from "react-redux";
+import { clearUser } from "../../redux/reducers/user";
 
-export const NavigationBar = ({ user, onLogout }) => {
+export const NavigationBar = () => {
+  const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
 
@@ -11,7 +15,8 @@ export const NavigationBar = ({ user, onLogout }) => {
 
   const handleLogout = () => {
     handleClose();
-    onLogout();
+    dispatch(clearUser());
+    localStorage.clear();
     navigate('/login');
   };
 

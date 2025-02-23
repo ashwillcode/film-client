@@ -1,16 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Modal, Button, Form, Row, Col } from 'react-bootstrap';
+import { Container, Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import { MovieCard } from '../movie-card/movie-card';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../../redux/reducers/user';
+import { FaHeart } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
-export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdate }) => {
+// Simplify date formatting functions
+const formatDateForDisplay = (dateString) => {
+  if (!dateString) return 'Not set';
+  // Keep the date in YYYY-MM-DD format and manually format it
+  const [year, month, day] = dateString.split('T')[0].split('-');
+  return `${month}/${day}/${year}`;
+};
+
+const formatDateForInput = (dateString) => {
+  if (!dateString) return '';
+  return dateString.split('T')[0];
+};
+
+export const ProfileView = ({ movies, onLoggedOut }) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  const token = useSelector((state) => state.user.token);
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || '',
     email: user?.email || '',
     password: '',
+    currentPassword: '',
     birthday: user?.birthday || ''
   });
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Safely filter favorite movies
   const favoriteMovies = React.useMemo(() => {
@@ -25,6 +48,7 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
         {
           method: 'DELETE',
           headers: {
+            'Accept': 'application/json',
             Authorization: `Bearer ${token}`
           }
         }
@@ -36,23 +60,38 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
 
       const responseData = await response.json();
       
-      // Create updated user object maintaining all existing user data
+      // Update Redux store with new user data
       const updatedUser = {
         ...user,
         favoritemovies: responseData.favoritemovies || []
       };
 
-      if (onUserUpdate) {
-        onUserUpdate(updatedUser);
-      }
+      dispatch(setUser(updatedUser));
+
     } catch (error) {
       console.error('Error removing favorite:', error);
+      setError(error.message || 'Failed to remove from favorites');
     }
   };
 
   const handleUpdate = async (event) => {
     event.preventDefault();
     try {
+      if (!formData.currentPassword) {
+        setError("Current password is required to make changes");
+        return;
+      }
+
+      console.log('Birthday being sent:', formData.birthday);
+
+      const updateData = {
+        username: formData.username,
+        email: formData.email,
+        birthday: formData.birthday,
+        password: formData.currentPassword,
+        ...(formData.password.trim() !== '' && { newPassword: formData.password })
+      };
+
       const response = await fetch(
         `https://filmapi-ab3ce15dfb3f.herokuapp.com/users/${user.username}`,
         {
@@ -61,26 +100,44 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify(updateData)
         }
       );
 
       if (!response.ok) {
-        throw new Error('Update failed');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Update failed');
       }
 
       const updatedUser = await response.json();
-      setShowEditModal(false);
+      console.log('Received updated user:', updatedUser);
       
-      // Preserve existing user data while updating changed fields
-      const newUserData = {
+      const updatedUserData = {
         ...user,
-        ...updatedUser
+        ...updatedUser,
+        token,
+        favoritemovies: user.favoritemovies,
+        birthday: formData.birthday
       };
+
+      console.log('Final user data:', updatedUserData);
+
+      dispatch(setUser(updatedUserData));
       
-      if (onUserUpdate) onUserUpdate(newUserData);
+      setShowEditModal(false);
+      setError(null);
+
+      setFormData({
+        username: updatedUserData.username,
+        email: updatedUserData.email,
+        password: '',
+        currentPassword: '',
+        birthday: updatedUserData.birthday
+      });
+
     } catch (error) {
       console.error('Error updating profile:', error);
+      setError(error.message || 'Failed to update profile');
     }
   };
 
@@ -92,7 +149,7 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
           {
             method: "DELETE",
             headers: {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${user.token}`
             }
           }
         );
@@ -164,7 +221,7 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
           <div className="detail-item">
             <p className="detail-label">Birthday</p>
             <p className="detail-value">
-              {user.birthday ? new Date(user.birthday).toLocaleDateString() : 'Not set'}
+              {formatDateForDisplay(user.birthday)}
             </p>
           </div>
         </div>
@@ -173,7 +230,22 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
         <div className="favorite-movies-section mt-4">
           <h5 className="mb-4">Favorite Movies</h5>
           {favoriteMovies.length === 0 ? (
-            <p>No favorite movies yet</p>
+            <div className="empty-favorites text-center py-5">
+              <div className="empty-favorites-icon mb-3">
+                <FaHeart size={48} style={{ color: '#ddd' }} />
+              </div>
+              <h6 className="mb-2">No Favorite Movies Yet</h6>
+              <p className="text-muted mb-4">
+                Start building your collection by clicking the heart icon on movies you love.
+              </p>
+              <Button 
+                onClick={() => navigate('/')}
+                className="browse-movies-btn"
+                variant="outline-primary"
+              >
+                Browse Movies
+              </Button>
+            </div>
           ) : (
             <Row className="g-4">
               {favoriteMovies.map(movie => (
@@ -181,7 +253,7 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
                   <MovieCard
                     movie={movie}
                     isFavorite={true}
-                    onToggleFavorite={() => removeFavorite(movie._id)}
+                    onToggleFavorite={removeFavorite}
                   />
                 </Col>
               ))}
@@ -189,19 +261,114 @@ export const ProfileView = ({ user, token, movies = [], onLoggedOut, onUserUpdat
           )}
         </div>
       </div>
+
+      <Modal 
+        show={showEditModal} 
+        onHide={() => setShowEditModal(false)}
+        centered
+        size="md"
+        className="edit-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="gradient-text">Edit Profile</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error && (
+            <Alert variant="danger" onClose={() => setError(null)} dismissible>
+              {error}
+            </Alert>
+          )}
+          <Form onSubmit={handleUpdate} className="edit-form">
+            <Form.Group className="mb-3">
+              <Form.Label>Username: <span className="text-danger">*</span></Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                required
+                minLength="3"
+                placeholder="Enter username"
+                className="form-input"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Email: <span className="text-danger">*</span></Form.Label>
+              <Form.Control
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                required
+                placeholder="Enter email"
+                className="form-input"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Current Password: <span className="text-danger">*</span></Form.Label>
+              <Form.Control
+                type="password"
+                value={formData.currentPassword}
+                onChange={(e) => setFormData({...formData, currentPassword: e.target.value})}
+                placeholder="Enter current password"
+                required
+                className="form-input"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>New Password:</Form.Label>
+              <Form.Control
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                placeholder="Leave blank to keep current password"
+                className="form-input"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Birthday:</Form.Label>
+              <Form.Control
+                type="date"
+                value={formatDateForInput(formData.birthday)}
+                onChange={(e) => setFormData({...formData, birthday: e.target.value})}
+                className="form-input"
+              />
+            </Form.Group>
+
+            <div className="d-flex justify-content-end gap-2">
+              <Button 
+                variant="secondary" 
+                onClick={() => setShowEditModal(false)}
+                className="cancel-button"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="submit-button"
+              >
+                Save Changes
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };
 
 ProfileView.propTypes = {
-  user: PropTypes.shape({
-    username: PropTypes.string,
-    email: PropTypes.string,
-    birthday: PropTypes.string,
-    favoritemovies: PropTypes.arrayOf(PropTypes.string)
-  }).isRequired,
-  token: PropTypes.string.isRequired,
-  movies: PropTypes.array,
-  onLoggedOut: PropTypes.func.isRequired,
-  onUserUpdate: PropTypes.func
+  movies: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      imagepath: PropTypes.string.isRequired,
+      director: PropTypes.shape({
+        name: PropTypes.string.isRequired
+      }).isRequired
+    })
+  ).isRequired,
+  onLoggedOut: PropTypes.func.isRequired
 };

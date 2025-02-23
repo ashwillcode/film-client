@@ -3,26 +3,16 @@ import PropTypes from 'prop-types';
 import { Modal, Button, Alert } from 'react-bootstrap';
 import { FaHeart } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
 
-export const MovieView = ({ movies, user, onToggleFavorite }) => {
+export const MovieView = ({ onToggleFavorite }) => {
+  const selectedMovie = useSelector((state) => state.movies.selectedMovie);
+  const user = useSelector((state) => state.user.user);
   const { movieId } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState(null);
-  
-  const movie = movies.find(m => m._id === movieId);
-  const isFavorite = user?.FavoriteMovies?.includes(movieId);
 
-  const handleFavoriteClick = async (e) => {
-    e.stopPropagation();
-    try {
-      await onToggleFavorite(movie._id);
-    } catch (error) {
-      setError(error.message || 'An error occurred while updating favorites');
-      setTimeout(() => setError(null), 3000);
-    }
-  };
-
-  if (!movie) {
+  if (!selectedMovie) {
     return (
       <div className="text-center p-4">
         <p>Movie not found</p>
@@ -36,6 +26,18 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
       </div>
     );
   }
+
+  const isFavorite = user?.FavoriteMovies?.includes(movieId);
+
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation();
+    try {
+      await onToggleFavorite(selectedMovie._id);
+    } catch (error) {
+      setError(error.message || 'An error occurred while updating favorites');
+      setTimeout(() => setError(null), 3000);
+    }
+  };
 
   return (
     <Modal
@@ -59,8 +61,8 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
         <div className="modal-body">
           <div className="modal-image-container">
             <img
-              src={movie.imagepath}
-              alt={movie.title}
+              src={selectedMovie.imagepath}
+              alt={selectedMovie.title}
               className="modal-image"
             />
             <FaHeart
@@ -73,12 +75,12 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
           <div className="modal-info">
             <button onClick={() => navigate('/')} className="close-button">✕</button>
             <div className="modal-header">
-              <h1 className="modal-title">{movie.title}</h1>
+              <h1 className="modal-title">{selectedMovie.title}</h1>
             </div>
-            <p className="movie-description">{movie.description}</p>
+            <p className="movie-description">{selectedMovie.description}</p>
             <div className="movie-meta">
-              <p><strong>Genre:</strong> {movie.genre.name}</p>
-              <p><strong>Director:</strong> {movie.director.name}</p>
+              <p><strong>Genre:</strong> {selectedMovie.genre.name}</p>
+              <p><strong>Director:</strong> {selectedMovie.director.name}</p>
             </div>
           </div>
         </div>
@@ -88,7 +90,5 @@ export const MovieView = ({ movies, user, onToggleFavorite }) => {
 };
 
 MovieView.propTypes = {
-  movies: PropTypes.array.isRequired,
-  user: PropTypes.object.isRequired,
   onToggleFavorite: PropTypes.func.isRequired
 };
