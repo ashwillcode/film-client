@@ -30,8 +30,11 @@ export const LoginView = ({ onLoggedIn }) => {
       const response = await fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        mode: 'cors',
+        credentials: 'same-origin',
         body: JSON.stringify({ username, password })
       });
 
