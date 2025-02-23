@@ -9,6 +9,8 @@ export const SignupView = ({ onSignupSuccess }) => {
   const [birthday, setBirthday] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const passwordsMatch = password === confirmPassword;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -52,7 +54,7 @@ export const SignupView = ({ onSignupSuccess }) => {
     <div className="signup-container">
       <Form onSubmit={handleSubmit} className="signup-form">
         <Form.Group className="mb-3">
-          <Form.Label>Username:</Form.Label>
+          <Form.Label>Username: <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="text"
             value={username}
@@ -65,12 +67,21 @@ export const SignupView = ({ onSignupSuccess }) => {
             placeholder="Enter username"
           />
           <Form.Control.Feedback type="invalid">
-            Username can only contain letters, numbers, and underscores
+            Username must be between 3 and 30 characters
           </Form.Control.Feedback>
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Password:</Form.Label>
+          <Form.Text className="text-muted d-block mb-2">
+            Password must:
+            <ul className="mb-2 ps-3">
+              <li>Be at least 8 characters long</li>
+              <li>Include at least one letter</li>
+              <li>Include at least one number</li>
+              <li>Include at least one special character (@$!%*#?&)</li>
+            </ul>
+          </Form.Text>
+          <Form.Label>Password: <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="password"
             value={password}
@@ -81,7 +92,23 @@ export const SignupView = ({ onSignupSuccess }) => {
             placeholder="Enter password"
           />
           <Form.Control.Feedback type="invalid">
-            Password must be at least 8 characters long and include at least one letter, one number, and one special character
+            Please ensure your password meets all requirements
+          </Form.Control.Feedback>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Confirm Password: <span className="text-danger">*</span></Form.Label>
+          <Form.Control
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            isInvalid={confirmPassword && !passwordsMatch}
+            className="form-input"
+            placeholder="Confirm your password"
+          />
+          <Form.Control.Feedback type="invalid">
+            Passwords do not match
           </Form.Control.Feedback>
         </Form.Group>
 
@@ -114,7 +141,13 @@ export const SignupView = ({ onSignupSuccess }) => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <button type="submit" className="submit-button" disabled={isSubmitting}>Create Account</button>
+        <button 
+          type="submit" 
+          className="submit-button" 
+          disabled={isSubmitting || (confirmPassword && !passwordsMatch)}
+        >
+          Create Account
+        </button>
         {error && <div className="error-message">{error}</div>}
       </Form>
     </div>
