@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "../../redux/reducers/user";
 
-export const NavigationBar = () => {
+export const NavigationBar = ({ onLogout }) => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -15,8 +15,16 @@ export const NavigationBar = () => {
 
   const handleLogout = () => {
     handleClose();
-    dispatch(clearUser());
-    localStorage.clear();
+    
+    // Call parent onLogout if provided
+    if (onLogout && typeof onLogout === 'function') {
+      onLogout();
+    } else {
+      // Fallback to local implementation
+      dispatch(clearUser());
+      localStorage.clear();
+    }
+    
     navigate('/login');
   };
 
@@ -92,6 +100,5 @@ export const NavigationBar = () => {
 };
 
 NavigationBar.propTypes = {
-  user: PropTypes.object,
-  onLogout: PropTypes.func.isRequired
+  onLogout: PropTypes.func
 };

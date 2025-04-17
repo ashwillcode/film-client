@@ -33,7 +33,19 @@ export const MainView = () => {
         return response.json();
       })
       .then(data => {
-        dispatch(setMovies(data));
+        console.log("Movies data received:", data);
+        // Map API response fields to expected structure with better case handling
+        const mappedMovies = data.map(movie => ({
+          _id: movie.id || movie._id,
+          title: movie.title || movie.Title || "",
+          imagepath: movie.imagepath || movie.ImagePath || movie.Imagepath || "",
+          director: movie.director || movie.Director || { name: "Unknown Director" },
+          genre: movie.genre || movie.Genre || { name: "Unknown Genre" },
+          description: movie.description || movie.Description || "",
+          Featured: movie.Featured !== undefined ? movie.Featured : false
+        }));
+        console.log("Mapped movies:", mappedMovies);
+        dispatch(setMovies(mappedMovies));
         dispatch(setLoading(false));
       })
       .catch(err => {
@@ -102,7 +114,7 @@ export const MainView = () => {
 
   return (
     <Container>
-      <NavigationBar />
+      <NavigationBar onLogout={onLogout} />
       
       {error && (
         <Alert 

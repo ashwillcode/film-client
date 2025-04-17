@@ -249,18 +249,41 @@ export const ProfileView = ({ movies, onLoggedOut }) => {
           ) : (
             <Row className="g-4">
               {favoriteMovies.map(movie => (
-                <Col key={movie._id} xs={12} sm={6} md={4} lg={3}>
-                  <MovieCard
-                    movie={movie}
-                    isFavorite={true}
-                    onToggleFavorite={removeFavorite}
-                  />
+                <Col key={movie._id} xs={12} sm={6} md={4} lg={3} className="mb-4 d-flex align-items-stretch movie-grid-item">
+                  <div style={{ width: '100%', height: '100%' }}>
+                    <MovieCard
+                      movie={movie}
+                      isFavorite={true}
+                      onToggleFavorite={removeFavorite}
+                    />
+                  </div>
                 </Col>
               ))}
             </Row>
           )}
         </div>
       </div>
+
+      {/* Custom mobile responsiveness */}
+      <style>
+        {`
+          /* Extra small devices (phones, less than 576px) */
+          @media (max-width: 575.98px) {
+            .movie-grid-item {
+              flex: 0 0 100%; /* 1 card per row */
+              max-width: 100%;
+            }
+          }
+          
+          /* Small devices (landscape phones, 576px and up) */
+          @media (min-width: 576px) and (max-width: 767.98px) {
+            .movie-grid-item {
+              flex: 0 0 50%; /* 2 cards per row */
+              max-width: 50%;
+            }
+          }
+        `}
+      </style>
 
       <Modal 
         show={showEditModal} 
@@ -362,12 +385,13 @@ export const ProfileView = ({ movies, onLoggedOut }) => {
 ProfileView.propTypes = {
   movies: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      imagepath: PropTypes.string.isRequired,
+      _id: PropTypes.string,
+      id: PropTypes.string,
+      title: PropTypes.string,
+      imagepath: PropTypes.string,
       director: PropTypes.shape({
-        name: PropTypes.string.isRequired
-      }).isRequired
+        name: PropTypes.string
+      })
     })
   ).isRequired,
   onLoggedOut: PropTypes.func.isRequired
