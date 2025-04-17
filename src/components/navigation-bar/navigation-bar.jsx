@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, Form } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "../../redux/reducers/user";
+import { setFilter } from "../../redux/reducers/movies";
 
 export const NavigationBar = ({ onLogout }) => {
   const user = useSelector((state) => state.user.user);
+  const filter = useSelector((state) => state.movies.filter);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
@@ -28,13 +30,25 @@ export const NavigationBar = ({ onLogout }) => {
     navigate('/login');
   };
 
+  const searchStyles = {
+    borderRadius: '20px',
+    padding: '0.4rem 1rem',
+    border: '2px solid #e0e0e0',
+    transition: 'all 0.3s ease',
+    background: 'white',
+    width: '250px',
+    height: '38px',
+    margin: 0
+  };
+
   return (
     <Navbar 
       bg="white" 
       expand="lg" 
-      className="py-3"
+      className="py-3 align-items-center"
       expanded={expanded}
       onToggle={setExpanded}
+      style={{ minHeight: '70px' }}
     >
       <Container>
         <Navbar.Brand 
@@ -55,6 +69,18 @@ export const NavigationBar = ({ onLogout }) => {
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
+          {user && (
+            <Form className="d-flex mx-auto align-items-center flex-grow-1 justify-content-center" style={{ margin: 0, padding: 0 }}>
+              <Form.Control
+                type="text"
+                placeholder="Search movies..."
+                value={filter}
+                onChange={(e) => dispatch(setFilter(e.target.value))}
+                className="search-input"
+                style={searchStyles}
+              />
+            </Form>
+          )}
           <Nav className="ms-auto">
             {!user ? (
               <Nav.Link 
@@ -95,6 +121,41 @@ export const NavigationBar = ({ onLogout }) => {
           </Nav>
         </Navbar.Collapse>
       </Container>
+      <style>
+        {`
+          .navbar {
+            display: flex;
+            align-items: center;
+          }
+          
+          .navbar-collapse {
+            display: flex;
+            align-items: center;
+          }
+          
+          .form-control {
+            line-height: normal;
+          }
+          
+          .search-input:focus {
+            border-color: #4ECDC4 !important;
+            box-shadow: 0 0 0 0.2rem rgba(78, 205, 196, 0.25) !important;
+            outline: none !important;
+          }
+
+          .search-input::placeholder {
+            color: #999;
+          }
+
+          @media (max-width: 991.98px) {
+            .search-input {
+              margin-top: 15px;
+              margin-bottom: 15px;
+              width: 100% !important;
+            }
+          }
+        `}
+      </style>
     </Navbar>
   );
 };

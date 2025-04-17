@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Row, Col, Alert } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { MovieCard } from '../movie-card/movie-card';
-import { MoviesFilter } from '../movies-filter/movies-filter';
 
 export const MoviesList = ({ movies, onToggleFavorite }) => {
   const filter = useSelector((state) => state.movies.filter);
@@ -26,7 +25,6 @@ export const MoviesList = ({ movies, onToggleFavorite }) => {
 
   return (
     <>
-      <MoviesFilter />
       <Row className="g-4">
         {filteredMovies.map((movie) => {
           // Use either id or _id
