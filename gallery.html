@@ -7,6 +7,10 @@
 <body>
   <h1>Image Gallery</h1>
   <div id="gallery"></div>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" />
+    <button type="submit">Upload</button>
+  </form>  
 
   <script>
     fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/files')
@@ -32,6 +36,36 @@
         document.getElementById('gallery').innerText = 'Error loading images.';
         console.error(err);
       });
+
+      document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const fileInput = e.target.querySelector('input[name="file"]');
+    const file = fileInput.files[0];
+
+    if (!file) return alert('Please select a file to upload.');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        alert('Upload successful!');
+        window.location.reload(); // refresh to show new image
+      } else {
+        const errText = await response.text();
+        alert('Upload failed: ' + errText);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during upload.');
+    }
+  });
   </script>  
 </body>
 </html>
