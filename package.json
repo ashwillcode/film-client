@@ -4,7 +4,7 @@
   "description": "Front end to my filmapi using react",
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "parcel build src/index.html"
+    "build": "parcel build src/index.html src/gallery.html"
   },
   "author": "ashley williams",
   "license": "ISC",
