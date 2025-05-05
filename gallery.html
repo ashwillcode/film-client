@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image Gallery</title>
+</head>
+<body>
+  <h1>Image Gallery</h1>
+  <div id="gallery"></div>
+
+  <script>
+    fetch('https://filmapi-ab3ce15dfb3f.herokuapp.com/files')
+    .then(res => res.json())
+      .then(images => {
+        const container = document.getElementById('gallery');
+        images.forEach(img => {
+          const thumb = document.createElement('img');
+          thumb.src = img.thumbnail;
+          thumb.alt = 'Thumbnail';
+          container.appendChild(thumb);
+  
+          const link = document.createElement('a');
+          link.href = img.original;
+          link.innerText = ' View full image';
+          link.target = '_blank'; // optional: open in new tab
+          container.appendChild(link);
+  
+          container.appendChild(document.createElement('br'));
+        });
+      })
+      .catch(err => {
+        document.getElementById('gallery').innerText = 'Error loading images.';
+        console.error(err);
+      });
+  </script>  
+</body>
+</html>
